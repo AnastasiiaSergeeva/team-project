@@ -2,7 +2,6 @@
   "name": "parcel-project-template",
   "version": "1.1.0",
   "description": "",
-  
   "main": "index.js",
   "homepage": "https://anastasiiasergeeva.github.io/team-project/",
   "scripts": {
@@ -10,7 +9,7 @@
     "build": "parcel build src/*.html --public-url /team-project/"
   },
   "repository": {
-    "type": "git", 
+    "type": "git",
     "url": "git+https://github.com/goitacademy/parcel-project-template.git"
   },
   "keywords": [],
@@ -28,6 +27,7 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
+    "notiflix": "^3.2.5",
     "spin.js": "^4.1.1"
   }
 }
