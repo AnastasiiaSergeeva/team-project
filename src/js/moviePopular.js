@@ -1,311 +1,274 @@
-import{ Spinner }  from 'spin.js';
-import opts from './spinner';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+// import { refs } from './refs';
+// import queryMovied from './queryMovied';
 
+// let pageResetLoad;
+// let typeRequest = '';
+// let count = Number(localStorage.getItem('currentPage'));
 
-var target = document.querySelector('body');
-var spinner = new Spinner(opts);
+// const BASE_URL = 'https://api.themoviedb.org/3/';
+// const API_KEY = 'a8df323e9ca157a6f58df54190ee006c';
+// let QUERY = localStorage.getItem('QUERY');
 
-const movie = document.querySelector('.movie');
-let typeRequest = '';
-let count = 1;
-const axios = require('axios');
+// // ****** переход по кнопкам домой и лого ******
 
-const BASE_URL = 'https://api.themoviedb.org/3/';
-const API_KEY = 'a8df323e9ca157a6f58df54190ee006c';
+// function homePage() {
+//   count = 1;
+//   localStorage.setItem(`pageResetLoad`, `1`);
+//   moviePopular(count);
+// }
+// // !!!!!!!!!!!!
+// function currentPage(page) {
+//   return localStorage.setItem(`currentPage`, `${page}`);
+// }
 
-// *****  Запрос популярных фильмов ****************************************
-export default function moviePopular(numberPage = 1) {
-  spinner.spin(target);
-  return axios
-    .get(`${BASE_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${numberPage}`)
-    .then(response => {
-      // console.log(response.data);
-      renderPagination(response.data.total_pages);
-      typeRequest = true;
-      render(response.data.results);
-      spinner.stop();
-    });
-}
-moviePopular();
+// // !!!!!!!! start  !!!!!!!!!!!!!!!
 
-// *****  Запрос жанров фильмоы  *******************************************
-function movieGenre() {
-  return axios
-    .get(`${BASE_URL}genre/movie/list?api_key=${API_KEY}&language=en-US`)
-    .then(response => {
-      return saveStorageGenres(response.data.genres);
-    });
-}
-movieGenre();
+// export default function startHP() {
+//   if (1 === Number(localStorage.getItem('pageResetLoad'))) {
+//     moviePopular(count);
+//   } else if (2 === Number(localStorage.getItem('pageResetLoad'))) {
+//     movieSearch(count);
+//   }
+// }
 
-function saveStorageGenres(genres) {
-  genres.map(({ id, name }) => {
-    return localStorage.setItem(`${id}`, `${name}`);
-  });
-}
+// // !!!!!!!!!!!!!  end !!!!!!!!!!!!!!!!
 
-// *************************************************************************
+// // *****  Запрос популярных фильмов ****************************************
+// function moviePopular(numberPage) {
+//   queryMovied(`${BASE_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${numberPage}`);
+//   typeRequest = true;
+// }
 
-function render(markup) {
-  movie.innerHTML = markup
-    .map(({ original_title, poster_path, genre_ids, release_date, vote_average, id }) => {
-      return `
-      <a class="movie-item" data-id="${id}"href="#" onclick="event.preventDefault()">
-      <img class="movie-img" src="https://image.tmdb.org/t/p/w500${poster_path}" />
-      <h2 class="movie-title">${original_title}</h2>
-      <ul class="movie-blok-info">
-      <li>${genre_ids.map(genre_ids => localStorage.getItem(genre_ids)).join(', ')}</li>
-      <li class="movie-year">&nbsp;|&nbsp;${release_date.substr(0, 4)}</li>
-      <li class="movie-vote_average">${vote_average.toFixed(1)}</li>
-      </ul>
-      </a>`;
-    })
-    .join('');
-}
+// // *****  Поиск по названию фильма  *****
 
-// *****  Поиск по названию фильма  *****
+// refs.input.addEventListener('input', inputSearch);
+// refs.input.addEventListener('submit', btpSearch);
 
-const input = document.querySelector('.search-form');
-let QUERY_PROMT = '';
-input.addEventListener('input', inputSearch);
-input.addEventListener('submit', loadImages);
+// function btpSearch(e) {
+//   e.preventDefault();
+//   count = 1;
+//   movieSearch(count);
+// }
+// function inputSearch() {
+//   localStorage.setItem(`QUERY`, refs.input.searchQuery.value);
+//   pageResetLoad = localStorage.setItem(`pageResetLoad`, `2`);
+// }
 
-function loadImages(e) {
-  e.preventDefault();
-  count = 1;
-  movieSearch();
-}
-function inputSearch() {
-  QUERY_PROMT = input.searchQuery.value;
-}
+// function movieSearch(page) {
+//   queryMovied(
+//     `${BASE_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${localStorage.getItem(
+//       'QUERY',
+//     )}&page=1&include_adult=false&page=${page}`,
+//   );
+//   typeRequest = false;
+// }
 
-function movieSearch(page) {
-  spinner.spin(target);
-  return axios
-    .get(
-      `${BASE_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${QUERY_PROMT}&page=1&include_adult=false&page=${page}`,
-    )
-    .then(response => {
-      typeRequest = false;
-      spinner.stop();
-      renderPagination(response.data.total_pages);
-      return render(response.data.results) ;
-    })
-      .catch (error =>{
-        if (!response.ok) {
-          Notify.failure('Search result not successful. Enter the correct movie name');        
-        }
-        console.log(error);
-        
-      })     
-    }
-    
-// *****  Рендер пагинации  *************
-const moviePogination = document.querySelector('.movie-pogination');
+// // *****  Рендер пагинации  *************
 
-function renderPagination(pages) {
-  let btn2 = 2;
-  let btn3 = 3;
-  let btn4 = 4;
-  let btn5 = 5;
-  let btn6 = '...';
-  let btn7 = '';
-  if (count > 4) {
-    btn2 = '...';
-    btn3 = count - 1;
-    btn4 = count;
-    btn5 = count + 1;
-  }
-  if (pages > count + 10) {
-    btn7 = count + 10;
-  } else {
-    btn3 = count;
-    btn4 = count + 1;
-    btn5 = count;
-    btn5 = count;
-    btn7 = count;
-  }
-  // if (count - 4 < pages) {
-  //   btn3 = count;
-  //   btn4 = count;
-  //   btn5 = count;
-  //   btn5 = count;
-  //   btn7 = count;
-  // }
-  if (pages < 6) {
-    btn6 = 6;
-  }
-  moviePogination.innerHTML = `
- <button class="prev-click" type="button">&larr;</button>
-  <button id="btn01" class="${count === 1 ? 'activ-btn' : ''}" type="button">1</button>
- <button id="btn02" class="${count === 2 ? 'activ-btn' : ''}" type="button">${btn2}</button>
- <button id="btn03" class="${count === 3 ? 'activ-btn' : ''}" type="button">${btn3}</button>
- <button id="btn04" class="${count >= 4 ? 'activ-btn' : ''}" type="button">${btn4}</button>
- <button id="btn05" class="${count === pages - 2 ? 'activ-btn' : ''}" type="button">${btn5}</button>
- <button id="btn06" class="${count === pages - 1 ? 'activ-btn' : ''}" type="button">${btn6}</button>
- <button id="btn07" class="${count === pages ? 'activ-btn' : ''}" type="button">${btn7}</button>
- <button class="next-click" type="button">&rarr;</button>
- `;
+// let pagesPogination = 0;
+// function renderPagination(pages) {
+//   pagesPogination = pages;
+//   let btn2 = 2;
+//   let btn3 = 3;
+//   let btn4 = 4;
+//   let btn5 = 5;
+//   let btn6 = '...';
+//   let btn7 = pages;
 
-  const nextClick = document.querySelector('.next-click');
-  const prevClick = document.querySelector('.prev-click');
-  prevClick.addEventListener('click', prevClickFu);
-  nextClick.addEventListener('click', nextClickFu);
+//   if (pages > count + 10) {
+//     btn7 = count + 10;
+//   }
 
-  const btn01 = document.querySelector('#btn01');
-  btn01.addEventListener('click', function () {
-    count = 0;
-    foo2(0);
-  });
+//   if (count >= pages - 2) {
+//     btn2 = '...';
+//     btn3 = pages - 4;
+//     btn4 = pages - 3;
+//     btn5 = pages - 2;
+//     btn6 = pages - 1;
+//     btn7 = pages;
+//   } else if (count > 4) {
+//     btn2 = '...';
+//     btn3 = count - 1;
+//     btn4 = count;
+//     btn5 = count + 1;
+//   }
+//   if (pages <= 7) {
+//     btn2 = 2;
+//     btn3 = 3;
+//     btn4 = 4;
+//     btn5 = 5;
+//     btn6 = 6;
+//     btn7 = 7;
+//   }
+//   refs.moviePogination.innerHTML = `
+//  <button class="prev-click" type="button">&larr;</button>
+//   <button id="btn01" class="${count === 1 ? 'activ-btn' : ''}" type="button">1</button>
+//  <button id="btn02" class="${count === 2 ? 'activ-btn' : ''}" type="button">${btn2}</button>
+//  <button id="btn03" class="${count === 3 ? 'activ-btn' : ''}" type="button">${btn3}</button>
+//  <button id="btn04" class="${
+//    count >= 4 && count < pages - 2 ? 'activ-btn' : ''
+//  }" type="button">${btn4}</button>
+//  <button id="btn05" class="${count === pages - 2 ? 'activ-btn' : ''}" type="button">${btn5}</button>
+//  <button id="btn06" class="${count === pages - 1 ? 'activ-btn' : ''}" type="button">${btn6}</button>
+//  <button id="btn07" class="${count === pages ? 'activ-btn' : ''}" type="button">${btn7}</button>
+//  <button class="next-click" type="button">&rarr;</button>
+//  `;
 
-  const btn02 = document.querySelector('#btn02');
-  btn02.addEventListener('click', function () {
-    if (count > 10) {
-      foo2(-11);
-    } else {
-      count = 0;
-      foo2(1);
-    }
-  });
+//   const nextClick = document.querySelector('.next-click');
+//   const prevClick = document.querySelector('.prev-click');
+//   prevClick.addEventListener('click', prevClickFu);
+//   nextClick.addEventListener('click', nextClickFu);
 
-  const btn03 = document.querySelector('#btn03');
-  btn03.addEventListener('click', function () {
-    if (count < 4) {
-      count = 2;
-      foo2(1);
-      btn5 = 5;
-    }
+//   const btn01 = document.querySelector('#btn01');
+//   btn01.addEventListener('click', function () {
+//     count = 0;
+//     nextClickFu();
+//   });
 
-    prevClickFu();
-  });
-  const btn04 = document.querySelector('#btn04');
-  if (count < 4) {
-    btn04.addEventListener('click', function () {
-      foo2(2);
-    });
-  }
+//   const btn02 = document.querySelector('#btn02');
+//   btn02.addEventListener('click', function () {
+//     if (count > 10) {
+//       count = count - 11;
+//       nextClickFu();
+//     } else {
+//       count = 1;
+//       nextClickFu();
+//     }
+//   });
 
-  const btn05 = document.querySelector('#btn05');
-  btn05.addEventListener('click', function () {
-    if (count < 4) {
-      count = 2;
-      foo2(1);
-      btn5 = 5;
-    }
-    nextClickFu();
-  });
-  const btn06 = document.querySelector('#btn06');
-  btn06.addEventListener('click', function () {
-    // foo2(9);
-  });
+//   const btn03 = document.querySelector('#btn03');
+//   btn03.addEventListener('click', function () {
+//     if (count < 4) {
+//       count = 3;
+//       nextClickFu();
+//     }
+//     prevClickFu();
+//   });
+//   const btn04 = document.querySelector('#btn04');
+//   if (count < 4) {
+//     btn04.addEventListener('click', function () {
+//       count = 3;
+//       nextClickFu();
+//     });
+//   } else if (count > pages - 6) {
+//     btn04.addEventListener('click', function () {
+//       count = pages - 4;
+//       btn7 = pages - 2;
+//       nextClickFu();
+//     });
+//   }
 
-  const btn07 = document.querySelector('#btn07');
-  btn07.addEventListener('click', function () {
-    foo2(9);
-  });
+//   const btn05 = document.querySelector('#btn05');
+//   btn05.addEventListener('click', function () {
+//     if (count < 5) {
+//       count = 4;
+//       nextClickFu();
+//       btn5 = 5;
+//       return;
+//     }
+//     if (count > 4 && count < pages - 3) {
+//       nextClickFu();
+//     } else {
+//       count = pages - 3;
+//       btn7 = pages - 2;
+//       nextClickFu();
+//     }
+//   });
 
-  if (pages <= 1) {
-    btn01.style.display = 'none';
-  }
-  if (pages <= 2) {
-    btn02.style.display = 'none';
-  }
-  if (pages <= 3) {
-    btn03.style.display = 'none';
-  }
-  if (pages <= 4) {
-    btn04.style.display = 'none';
-  }
-  if (pages <= 5) {
-    btn05.style.display = 'none';
-  }
-  if (pages <= 6) {
-    btn06.style.display = 'none';
-  }
-  if (pages <= 7) {
-    btn07.style.display = 'none';
-    nextClick.style.display = 'none';
-    prevClick.style.display = 'none';
-  }
+//   const btn06 = document.querySelector('#btn06');
+//   btn06.addEventListener('click', function () {
+//     if (pages > count + 10) {
+//       btn7 = count + 10;
+//       count = count + 9;
+//       nextClickFu();
+//     } else {
+//       count = pages - 2;
+//       btn7 = pages - 1;
+//       nextClickFu();
+//     }
+//   });
 
-  // if (pages <= 1) {
-  //   btn01.style.display = 'none';
-  //   btn02.style.display = 'none';
-  //   btn03.style.display = 'none';
-  //   btn04.style.display = 'none';
-  //   btn05.style.display = 'none';
-  //   btn06.style.display = 'none';
-  //   btn07.style.display = 'none';
-  //   nextClick.style.display = 'none';
-  //   prevClick.style.display = 'none';
-  // } else if (pages <= 2) {
-  //   btn02.style.display = 'none';
-  //   btn03.style.display = 'none';
-  //   btn04.style.display = 'none';
-  //   btn05.style.display = 'none';
-  //   btn06.style.display = 'none';
-  //   btn07.style.display = 'none';
-  //   nextClick.style.display = 'none';
-  //   prevClick.style.display = 'none';
-  // } else if (pages <= 3) {
-  //   btn03.style.display = 'none';
-  //   btn04.style.display = 'none';
-  //   btn05.style.display = 'none';
-  //   btn06.style.display = 'none';
-  //   btn07.style.display = 'none';
-  //   nextClick.style.display = 'none';
-  //   prevClick.style.display = 'none';
-  // } else if (pages <= 4) {
-  //   btn04.style.display = 'none';
-  //   btn05.style.display = 'none';
-  //   btn06.style.display = 'none';
-  //   btn07.style.display = 'none';
-  //   nextClick.style.display = 'none';
-  //   prevClick.style.display = 'none';
-  // } else if (pages <= 5) {
-  //   btn05.style.display = 'none';
-  //   btn06.style.display = 'none';
-  //   btn07.style.display = 'none';
-  //   nextClick.style.display = 'none';
-  //   prevClick.style.display = 'none';
-  // } else if (pages <= 6) {
-  //   btn06.style.display = 'none';
-  //   btn07.style.display = 'none';
-  //   nextClick.style.display = 'none';
-  //   prevClick.style.display = 'none';
-  // } else if (pages <= 7) {
-  //   btn07.style.display = 'none';
-  //   nextClick.style.display = 'none';
-  //   prevClick.style.display = 'none';
-  // }
-}
+//   const btn07 = document.querySelector('#btn07');
+//   btn07.addEventListener('click', function () {
+//     if (pages > count + 10) {
+//       btn7 = count + 10;
+//       count = count + 9;
+//       nextClickFu();
+//     } else {
+//       count = pages - 1;
+//       btn7 = pages;
+//       nextClickFu();
+//     }
+//   });
 
-function foo2(n) {
-  count = count + n;
-  console.log(n);
-  nextClickFu();
-}
+//   if (pages <= 1) {
+//     btn01.style.display = 'none';
+//   }
+//   if (pages < 2) {
+//     btn02.style.display = 'none';
+//   }
+//   if (pages < 3) {
+//     btn03.style.display = 'none';
+//   }
+//   if (pages < 4) {
+//     btn04.style.display = 'none';
+//   }
+//   if (pages < 5) {
+//     btn05.style.display = 'none';
+//   }
+//   if (pages < 6) {
+//     btn06.style.display = 'none';
+//   }
+//   if (pages < 7) {
+//     btn07.style.display = 'none';
+//     nextClick.style.display = 'none';
+//     prevClick.style.display = 'none';
+//   }
+// }
 
-function nextClickFu() {
-  count++;
-  if (typeRequest) {
-    moviePopular(count);
-  } else {
-    movieSearch(count);
-  }
-  // window.scrollTo({ top: 0, behavior: 'smooth' });
-  console.log(count);
-}
+// function nextClickFu() {
+//   if (count === pagesPogination) {
+//     return;
+//   }
+//   count++;
+//   movieQuery();
+// }
 
-function prevClickFu() {
-  if (count <= 1) {
-    return;
-  } else count--;
-  if (typeRequest) {
-    moviePopular(count);
-  } else {
-    movieSearch(count);
-  }
-  // window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+// function prevClickFu() {
+//   if (count <= 1) {
+//     return;
+//   } else count--;
+//   movieQuery();
+// }
+
+// function movieQuery() {
+//   if (typeRequest) {
+//     moviePopular(count);
+//   } else {
+//     movieSearch(count);
+//   }
+//   window.scrollTo({ top: 0, behavior: 'smooth' });
+// }
+
+// // ***********************************
+// export { renderPagination, currentPage, count, homePage };
+// import axios from 'axios';
+
+// const options = {
+//   method: 'GET',
+//   url: 'https://30-000-radio-stations-and-music-charts.p.rapidapi.com/rapidapi',
+//   params: { country: 'ALL', keyword: '<REQUIRED>', genre: 'ALL' },
+//   headers: {
+//     'X-RapidAPI-Host': '30-000-radio-stations-and-music-charts.p.rapidapi.com',
+//     'X-RapidAPI-Key': 'SIGN-UP-FOR-KEY',
+//   },
+// };
+
+// axios
+//   .request(options)
+//   .then(function (response) {
+//     console.log(response.data);
+//   })
+//   .catch(function (error) {
+//     console.error(error);
+//   });
